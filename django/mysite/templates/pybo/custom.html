@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="my-3 border-bottom pb2">&nbsp&nbsp Custom Application</h2>
+<div>
+    {% if state == '' %}
+    {% else %}
+    <script>
+        alert('{{ state }}')
+    </script>
+    {% endif %}
+</div>
+<div class='container'>
+    <h3>Project Number: {{ project.id }} <br>Project Name &nbsp : {{ project.NAME }}</h3>
+    <div>
+        <ul>
+                {% csrf_token %}
+            <p><Strong>GitHub Repository</strong></p>
+            <p><Strong>{{ project.GIT }}</Strong></p>
+            <hr/>
+            <li>
+                <form method='post' class='post-form my-3' action="{% url 'pybo:jenkins_api' %}">
+                    {% csrf_token %}
+                    <p><strong>Jenkins Build</strong></p>
+                    <p>빌드할 GitHub Repository 주소 : {{ project.GIT }}</p>
+                    <input type="hidden" name="addr" id="addr" value="{{ project.GIT }}"  maxlength="100">
+                    <input type="hidden" name="PN" id="PN" value="{{ project.NAME }}"  maxlength="100">
+                    <input type="hidden" name="KIND" id="KIND" value="{{ project.KIND }}"  maxlength="100">
+                    <input type="hidden" name="PID" id="PID" value="{{ project.id }}"  maxlength="100">
+                    <button type="submit" class="btn btn-primary btn-lg">빌드하기</button>
+                </form>
+                <a href='http://192.168.160.244:8080/job/{{ project.NAME }}/' class="btn btn-secondary btn-lg" target='_blank'>
+                    Jenkins Build 확인
+                </a>
+            </li>
+            <hr />
+            <li>
+                <form method='post' class='post-form my-3' action="{% url 'pybo:customapp' %}">
+                {% csrf_token %}
+                <p><strong>Argo CD Deploy</strong></p>
+                <p>빌드할 GitHub Repository 주소 : {{ project.GIT }}</p>
+                <P>Argo CD Repository</P>
+                <input type="text" name="GIT" id="GIT" placeholder="ArgoCD Repository" value="">
+                <input type="hidden" name="ADDR" id="ADDR" value="{{ project.GIT }}"  maxlength="100">
+                <input type="hidden" name="PN" id="PN" value="{{ project.NAME }}"  maxlength="100">
+                <input type="hidden" name="PID" id="PID" value="{{ project.id }}"  maxlength="100">
+                <button type="submit" class="btn btn-primary btn-lg">배포하기</button>
+                </form>
+            </li>
+            <hr />
+        </ul>
+        <table border="0" width="400">
+            <th>
+                <a href="{% url 'pybo:jenkins_backup' %}" class="delete btn btn-sm btn-outline-secondary">젠킨스 레포지토리 초기화</a>
+            </th>
+            <th>
+                <a href="javascript:void(0)" style="color:red" class="delete btn btn-sm btn-outline-secondary" data-uri="{% url 'pybo:project_delete' project.id %}">프로젝트 삭제</a>
+            </th>
+        </table>
+        
+
+        <script type='text/javascript'>
+            const delete_elements = document.getElementsByClassName("delete");
+            Array.from(delete_elements).forEach(function(element) {
+                element.addEventListener('click', function() {
+                    if(confirm("정말로 삭제하시겠습니까?")) {
+                        location.href = this.dataset.uri;
+                    };
+                });
+            });
+        </script>
+{% endblock %}
